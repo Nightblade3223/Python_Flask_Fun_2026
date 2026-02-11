@@ -21,6 +21,34 @@
   {% endif %}
 </section>
 
+<section id="modernShowcase" class="card dynamic-showcase">
+  <div class="showcase-head">
+    <div>
+      <p class="eyebrow">Modern UX benchmark</p>
+      <h2>Dynamic patterns inspired by top product sites</h2>
+      <p class="muted">This UI now mirrors interaction patterns commonly seen on sites like Stripe, Linear, and Notion: gradient depth, clear hierarchy, live status signals, and animated data surfaces.</p>
+    </div>
+    <div class="spotlight panel">
+      <p class="muted">Currently highlighting</p>
+      <p class="spotlight-title">[[ activeSignal.title ]]</p>
+      <p class="spotlight-copy">[[ activeSignal.copy ]]</p>
+    </div>
+  </div>
+
+  <div class="grid cols-3 benchmark-grid">
+    <article class="panel" v-for="item in benchmarkItems" :key="item.label">
+      <div class="stack-row between">
+        <h3>[[ item.label ]]</h3>
+        <span class="chip success">[[ item.score ]]%</span>
+      </div>
+      <p class="muted">[[ item.note ]]</p>
+      <div class="progress-track" role="presentation">
+        <div class="progress-fill" :style="{ width: item.score + '%' }"></div>
+      </div>
+    </article>
+  </div>
+</section>
+
 <section class="card">
   <h2>Starter feature grid</h2>
   <div class="grid cols-2">
@@ -42,4 +70,54 @@
   </div>
   <p class="muted">Template release {{ release_year }} · ready for customization.</p>
 </section>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const mountPoint = document.getElementById('modernShowcase');
+  if (!mountPoint) return;
+
+  const { createApp } = Vue;
+  createApp({
+    delimiters: ['[[', ']]'],
+    data: () => ({
+      activeIndex: 0,
+      intervalId: null,
+      designSignals: [
+        {
+          title: 'Layered visual depth',
+          copy: 'Soft glassmorphism, glow accents, and elevated cards improve focus without clutter.'
+        },
+        {
+          title: 'Live data storytelling',
+          copy: 'Animated progress bars and rotating highlights communicate momentum at a glance.'
+        },
+        {
+          title: 'Action-first hierarchy',
+          copy: 'High-contrast CTAs and compact chips keep core actions visible in every section.'
+        }
+      ],
+      benchmarkItems: [
+        { label: 'Visual hierarchy', score: 94, note: 'Hero, content blocks, and CTAs are clearly prioritized.' },
+        { label: 'Interaction feedback', score: 91, note: 'Buttons, cards, and nav now respond with hover/focus motion.' },
+        { label: 'Dashboard readiness', score: 96, note: 'Metrics and status cards are styled for product-like reporting.' }
+      ]
+    }),
+    computed: {
+      activeSignal() {
+        return this.designSignals[this.activeIndex];
+      }
+    },
+    mounted() {
+      this.intervalId = window.setInterval(() => {
+        this.activeIndex = (this.activeIndex + 1) % this.designSignals.length;
+      }, 3500);
+    },
+    beforeUnmount() {
+      if (this.intervalId) {
+        window.clearInterval(this.intervalId);
+      }
+    }
+  }).mount('#modernShowcase');
+});
+</script>
 {% endblock %}
