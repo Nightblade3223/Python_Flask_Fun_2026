@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Component Examples · Flask Modern{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Widget and component examples</h1>
+  <p class="muted">These pre-built UI examples are intentionally generic so you can swap in your own domain content.</p>
+</section>
+
+<section class="grid cols-4 metrics-grid">
+  {% for metric in metrics %}
+  <article class="card metric-card">
+    <p class="metric-value">{{ metric.value }}</p>
+    <p class="muted metric-label">{{ metric.label }}</p>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Preview cards</h2>
+  <div class="grid cols-3">
+    <article class="panel">
+      <h3>Notifications</h3>
+      <p class="muted">Alert box patterns for success, warning, and errors.</p>
+      <div class="notice success">Deployment completed successfully.</div>
+      <div class="notice warn">2 tasks are waiting for review.</div>
+    </article>
+    <article class="panel">
+      <h3>Task list widget</h3>
+      <ul class="list compact">
+        <li>Connect production database</li>
+        <li>Configure analytics tracking</li>
+        <li>Finalize user onboarding copy</li>
+      </ul>
+    </article>
+    <article class="panel">
+      <h3>CTA widget</h3>
+      <p class="muted">Use this pattern to drive users into your core product action.</p>
+      <a class="primary-btn" href="{{ url_for('auth.signup_page') }}">Start now</a>
+    </article>
+  </div>
+</section>
+{% endblock %}
