@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Home · Flask Modern{% endblock %}
+{% block content %}
+<section class="hero card">
+  {% if current_user.is_authenticated %}
+    <h1>Welcome back, {{ current_user.username }} 👋</h1>
+    <p>You are signed in and your account is ready.</p>
+    {% if current_user.is_admin %}
+      <a class="primary-btn" href="{{ url_for('admin.admin_dashboard') }}">Open Admin Panel</a>
+    {% endif %}
+  {% else %}
+    <h1>Flask App Boilerplate</h1>
+    <p>A modern starter with Vue-powered auth interactions and an admin panel.</p>
+    <div class="stack-row">
+      <a class="primary-btn" href="{{ url_for('auth.signup_page') }}">Create account</a>
+      <a class="ghost-btn" href="{{ url_for('auth.login_page') }}">Login</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
