@@ -4,10 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Flask Starter{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
 </head>
 <body>
+  <div class="site-bg" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+  </div>
+
   <header class="topbar">
     <div class="wrap nav-content">
       <a href="{{ url_for('main.index') }}" class="logo">Flask Modern</a>
@@ -30,7 +39,7 @@
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap main-shell">
     {% block content %}{% endblock %}
   </main>
 </body>
