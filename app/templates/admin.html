@@ -20,11 +20,28 @@
           <input type="checkbox" id="admin-{{ user.id }}" {% if user.is_admin %}checked{% endif %} />
         </td>
         <td>
-          <select id="groups-{{ user.id }}" multiple class="multi-select">
-            {% for group in groups %}
-              <option value="{{ group.id }}" {% if group in user.groups %}selected{% endif %}>{{ group.name }}</option>
-            {% endfor %}
-          </select>
+          <div class="group-picker" aria-label="Group selection for {{ user.username }}">
+            <div>
+              <label for="groups-available-{{ user.id }}">Available</label>
+              <select id="groups-available-{{ user.id }}" multiple class="multi-select">
+                {% for group in groups if group not in user.groups %}
+                  <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="group-picker-actions">
+              <button type="button" class="ghost-btn picker-btn" onclick="addGroups({{ user.id }})">Add →</button>
+              <button type="button" class="ghost-btn picker-btn" onclick="removeGroups({{ user.id }})">← Remove</button>
+            </div>
+            <div>
+              <label for="groups-selected-{{ user.id }}">Assigned</label>
+              <select id="groups-selected-{{ user.id }}" multiple class="multi-select">
+                {% for group in user.groups|sort(attribute='name') %}
+                  <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
         </td>
         <td class="stack-row">
           <button class="ghost-btn" onclick="saveUser({{ user.id }})">Save</button>
@@ -77,8 +94,38 @@
 
 <script>
   function selectedGroupIds(userId) {
-    const select = document.getElementById(`groups-${userId}`);
-    return Array.from(select.selectedOptions).map((option) => Number(option.value));
+    const select = document.getElementById(`groups-selected-${userId}`);
+    return Array.from(select.options).map((option) => Number(option.value));
+  }
+
+  function moveSelectedOptions(fromSelect, toSelect) {
+    const selected = Array.from(fromSelect.selectedOptions);
+    if (!selected.length) {
+      return;
+    }
+
+    selected.forEach((option) => {
+      toSelect.add(option);
+    });
+
+    sortOptions(toSelect);
+  }
+
+  function sortOptions(select) {
+    const sorted = Array.from(select.options).sort((a, b) => a.text.localeCompare(b.text));
+    sorted.forEach((option) => select.add(option));
+  }
+
+  function addGroups(userId) {
+    const available = document.getElementById(`groups-available-${userId}`);
+    const selected = document.getElementById(`groups-selected-${userId}`);
+    moveSelectedOptions(available, selected);
+  }
+
+  function removeGroups(userId) {
+    const available = document.getElementById(`groups-available-${userId}`);
+    const selected = document.getElementById(`groups-selected-${userId}`);
+    moveSelectedOptions(selected, available);
   }
 
   async function apiPost(url, payload) {

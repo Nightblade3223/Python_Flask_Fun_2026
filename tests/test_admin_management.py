@@ -76,3 +76,63 @@ def test_admin_safety_rules(client, app):
 
     delete_self = client.post(f"/admin/api/users/{admin_id}/delete")
     assert delete_self.status_code == 400
+
+
+def test_user_groups_can_be_added_and_removed(client, app):
+    _, user_id = create_admin_and_login(client, app)
+    login = client.post("/api/login", json={"email": "admin@example.com", "password": "password123"})
+    assert login.status_code == 200
+
+    client.post("/admin/api/groups", json={"name": "Editors", "permissions": "posts.read"})
+    client.post("/admin/api/groups", json={"name": "Moderators", "permissions": "users.read"})
+
+    with app.app_context():
+        editors = Group.query.filter_by(name="Editors").first()
+        moderators = Group.query.filter_by(name="Moderators").first()
+        assert editors is not None
+        assert moderators is not None
+
+    add_groups = client.post(
+        f"/admin/api/users/{user_id}",
+        json={
+            "username": "member",
+            "email": "member@example.com",
+            "is_admin": False,
+            "group_ids": [editors.id, moderators.id],
+        },
+    )
+    assert add_groups.status_code == 200
+
+    with app.app_context():
+        user = db.session.get(User, user_id)
+        assert sorted(group.name for group in user.groups) == ["Editors", "Moderators"]
+
+    remove_group = client.post(
+        f"/admin/api/users/{user_id}",
+        json={
+            "username": "member",
+            "email": "member@example.com",
+            "is_admin": False,
+            "group_ids": [moderators.id],
+        },
+    )
+    assert remove_group.status_code == 200
+
+    with app.app_context():
+        user = db.session.get(User, user_id)
+        assert [group.name for group in user.groups] == ["Moderators"]
+
+    clear_groups = client.post(
+        f"/admin/api/users/{user_id}",
+        json={
+            "username": "member",
+            "email": "member@example.com",
+            "is_admin": False,
+            "group_ids": [],
+        },
+    )
+    assert clear_groups.status_code == 200
+
+    with app.app_context():
+        user = db.session.get(User, user_id)
+        assert user.groups == []
