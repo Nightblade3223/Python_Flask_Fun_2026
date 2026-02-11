@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Login · Flask Modern{% endblock %}
+{% block content %}
+<section id="authApp" class="card auth-card">
+  <h1>Login</h1>
+  <p class="muted">Welcome back. Sign in to continue.</p>
+  <form @submit.prevent="submit">
+    <label>Email<input v-model="email" type="email" required></label>
+    <label>Password<input v-model="password" type="password" required></label>
+    <button class="primary-btn" :disabled="loading">[[ loading ? 'Signing in...' : 'Login' ]]</button>
+  </form>
+  <p v-if="error" class="error">[[ error ]]</p>
+</section>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const { createApp } = Vue;
+  createApp({
+    delimiters: ['[[', ']]'],
+    data: () => ({ email: '', password: '', loading: false, error: '' }),
+    methods: {
+      async submit() {
+        this.loading = true;
+        this.error = '';
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.email, password: this.password })
+        });
+        const data = await res.json();
+        this.loading = false;
+        if (!res.ok) {
+          this.error = data.error || 'Login failed';
+          return;
+        }
+        window.location.href = data.is_admin ? '/admin/' : '/';
+      }
+    }
+  }).mount('#authApp');
+});
+</script>
+{% endblock %}

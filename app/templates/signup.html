@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Sign up · Flask Modern{% endblock %}
+{% block content %}
+<section id="signupApp" class="card auth-card">
+  <h1>Create account</h1>
+  <p class="muted">The first account created automatically becomes admin.</p>
+  <form @submit.prevent="submit">
+    <label>Username<input v-model="username" type="text" minlength="3" required></label>
+    <label>Email<input v-model="email" type="email" required></label>
+    <label>Password<input v-model="password" type="password" minlength="8" required></label>
+    <button class="primary-btn" :disabled="loading">[[ loading ? 'Creating...' : 'Create account' ]]</button>
+  </form>
+  <p v-if="error" class="error">[[ error ]]</p>
+</section>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const { createApp } = Vue;
+  createApp({
+    delimiters: ['[[', ']]'],
+    data: () => ({ username: '', email: '', password: '', loading: false, error: '' }),
+    methods: {
+      async submit() {
+        this.loading = true;
+        this.error = '';
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: this.username, email: this.email, password: this.password })
+        });
+        const data = await res.json();
+        this.loading = false;
+        if (!res.ok) {
+          this.error = data.error || 'Signup failed';
+          return;
+        }
+        window.location.href = data.is_admin ? '/admin/' : '/';
+      }
+    }
+  }).mount('#signupApp');
+});
+</script>
+{% endblock %}
