@@ -3,21 +3,164 @@
 {% block content %}
 <section class="card">
   <h1>Admin Panel</h1>
-  <p class="muted">Manage users in your application.</p>
+  <p class="muted">Manage users and access groups.</p>
+
+  <h2>User Management</h2>
   <table>
     <thead>
-      <tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr>
+      <tr><th>ID</th><th>Username</th><th>Email</th><th>Admin</th><th>Groups</th><th>Actions</th></tr>
     </thead>
     <tbody>
       {% for user in users %}
       <tr>
         <td>{{ user.id }}</td>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ 'Admin' if user.is_admin else 'User' }}</td>
+        <td><input id="username-{{ user.id }}" value="{{ user.username }}" /></td>
+        <td><input id="email-{{ user.id }}" value="{{ user.email }}" /></td>
+        <td>
+          <input type="checkbox" id="admin-{{ user.id }}" {% if user.is_admin %}checked{% endif %} />
+        </td>
+        <td>
+          <select id="groups-{{ user.id }}" multiple class="multi-select">
+            {% for group in groups %}
+              <option value="{{ group.id }}" {% if group in user.groups %}selected{% endif %}>{{ group.name }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td class="stack-row">
+          <button class="ghost-btn" onclick="saveUser({{ user.id }})">Save</button>
+          {% if user.id != current_user.id %}
+          <button class="danger-btn" onclick="deleteUser({{ user.id }})">Delete</button>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+
+  <h2 style="margin-top:1.4rem;">Group Management</h2>
+  <div class="panel" style="margin-bottom:.9rem;">
+    <h3>Create Group</h3>
+    <div class="grid cols-3">
+      <div>
+        <label for="new-group-name">Name</label>
+        <input id="new-group-name" placeholder="e.g. Editors" />
+      </div>
+      <div style="grid-column: span 2;">
+        <label for="new-group-perms">Permissions (comma separated)</label>
+        <input id="new-group-perms" placeholder="posts.read, posts.write" />
+      </div>
+    </div>
+    <button class="primary-btn" style="margin-top:.8rem;" onclick="createGroup()">Create Group</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Permissions</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for group in groups %}
+      <tr>
+        <td>{{ group.id }}</td>
+        <td><input id="group-name-{{ group.id }}" value="{{ group.name }}" /></td>
+        <td><input id="group-perms-{{ group.id }}" value="{{ group.permissions }}" /></td>
+        <td class="stack-row">
+          <button class="ghost-btn" onclick="saveGroup({{ group.id }})">Save</button>
+          <button class="danger-btn" onclick="deleteGroup({{ group.id }})">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p id="admin-message" class="notice" style="display:none;"></p>
 </section>
+
+<script>
+  function selectedGroupIds(userId) {
+    const select = document.getElementById(`groups-${userId}`);
+    return Array.from(select.selectedOptions).map((option) => Number(option.value));
+  }
+
+  async function apiPost(url, payload) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {})
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || 'Request failed');
+    }
+
+    return data;
+  }
+
+  function showMessage(message, isError) {
+    const el = document.getElementById('admin-message');
+    el.style.display = 'block';
+    el.className = `notice ${isError ? 'warn' : 'success'}`;
+    el.textContent = message;
+  }
+
+  async function saveUser(userId) {
+    try {
+      await apiPost(`/admin/api/users/${userId}`, {
+        username: document.getElementById(`username-${userId}`).value,
+        email: document.getElementById(`email-${userId}`).value,
+        is_admin: document.getElementById(`admin-${userId}`).checked,
+        group_ids: selectedGroupIds(userId)
+      });
+      showMessage('User updated successfully.');
+    } catch (err) {
+      showMessage(err.message, true);
+    }
+  }
+
+  async function deleteUser(userId) {
+    if (!confirm('Delete this user?')) return;
+
+    try {
+      await apiPost(`/admin/api/users/${userId}/delete`);
+      location.reload();
+    } catch (err) {
+      showMessage(err.message, true);
+    }
+  }
+
+  async function createGroup() {
+    try {
+      await apiPost('/admin/api/groups', {
+        name: document.getElementById('new-group-name').value,
+        permissions: document.getElementById('new-group-perms').value
+      });
+      location.reload();
+    } catch (err) {
+      showMessage(err.message, true);
+    }
+  }
+
+  async function saveGroup(groupId) {
+    try {
+      await apiPost(`/admin/api/groups/${groupId}`, {
+        name: document.getElementById(`group-name-${groupId}`).value,
+        permissions: document.getElementById(`group-perms-${groupId}`).value
+      });
+      showMessage('Group updated successfully.');
+    } catch (err) {
+      showMessage(err.message, true);
+    }
+  }
+
+  async function deleteGroup(groupId) {
+    if (!confirm('Delete this group?')) return;
+
+    try {
+      await apiPost(`/admin/api/groups/${groupId}/delete`);
+      location.reload();
+    } catch (err) {
+      showMessage(err.message, true);
+    }
+  }
+</script>
 {% endblock %}

@@ -390,3 +390,14 @@ tbody tr:hover td {
     border-right: 0;
   }
 }
+
+
+.danger-btn {
+  background: rgba(255, 141, 161, 0.2);
+  border: 1px solid rgba(255, 141, 161, 0.45);
+  color: #ffd9e0;
+}
+
+.multi-select {
+  min-height: 88px;
+}
