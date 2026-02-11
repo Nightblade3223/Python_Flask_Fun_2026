@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  backend:
+    build: ./backend
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/app
+      SECRET_KEY: super-secret-change
+      FRONTEND_ORIGIN: http://localhost:5173
+    depends_on: [db]
+    ports: ["8000:8000"]
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://backend:8000
+    depends_on: [backend]
+    ports: ["5173:5173"]
+
+volumes:
+  pgdata:
