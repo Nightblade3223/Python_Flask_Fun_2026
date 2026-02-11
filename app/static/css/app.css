@@ -401,3 +401,36 @@ tbody tr:hover td {
 .multi-select {
   min-height: 88px;
 }
+
+
+.group-picker {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
+  gap: .6rem;
+  align-items: center;
+}
+
+.group-picker-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.picker-btn {
+  min-width: 88px;
+}
+
+.group-picker label {
+  margin-top: 0;
+  font-size: .82rem;
+}
+
+@media (max-width: 900px) {
+  .group-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .group-picker-actions {
+    flex-direction: row;
+  }
+}
