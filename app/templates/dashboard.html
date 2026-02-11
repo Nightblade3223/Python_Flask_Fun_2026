@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Flask Modern{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Team dashboard</h1>
+  <p class="muted">A sample authenticated page to demonstrate private app sections.</p>
+</section>
+
+<section class="grid cols-4 metrics-grid">
+  <article class="card metric-card">
+    <p class="metric-value">{{ stats.projects }}</p>
+    <p class="muted metric-label">Projects</p>
+  </article>
+  <article class="card metric-card">
+    <p class="metric-value">{{ stats.open_tasks }}</p>
+    <p class="muted metric-label">Open tasks</p>
+  </article>
+  <article class="card metric-card">
+    <p class="metric-value">{{ stats.deployments }}</p>
+    <p class="muted metric-label">Deployments</p>
+  </article>
+  <article class="card metric-card">
+    <p class="metric-value">{{ stats.uptime }}</p>
+    <p class="muted metric-label">Uptime</p>
+  </article>
+</section>
+
+<section class="card">
+  <h2>Project timeline</h2>
+  <ul class="list">
+    {% for entry in timeline %}
+      <li>{{ entry }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

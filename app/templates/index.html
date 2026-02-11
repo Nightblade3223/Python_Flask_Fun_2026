@@ -5,16 +5,41 @@
   {% if current_user.is_authenticated %}
     <h1>Welcome back, {{ current_user.username }} 👋</h1>
     <p>You are signed in and your account is ready.</p>
-    {% if current_user.is_admin %}
-      <a class="primary-btn" href="{{ url_for('admin.admin_dashboard') }}">Open Admin Panel</a>
-    {% endif %}
+    <div class="stack-row">
+      <a class="primary-btn" href="{{ url_for('main.dashboard') }}">Open Team Dashboard</a>
+      {% if current_user.is_admin %}
+        <a class="ghost-btn" href="{{ url_for('admin.admin_dashboard') }}">Open Admin Panel</a>
+      {% endif %}
+    </div>
   {% else %}
     <h1>Flask App Boilerplate</h1>
-    <p>A modern starter with Vue-powered auth interactions and an admin panel.</p>
+    <p>A modern starter with Vue-powered auth interactions, reusable widgets, and sample pages.</p>
     <div class="stack-row">
       <a class="primary-btn" href="{{ url_for('auth.signup_page') }}">Create account</a>
       <a class="ghost-btn" href="{{ url_for('auth.login_page') }}">Login</a>
     </div>
   {% endif %}
+</section>
+
+<section class="card">
+  <h2>Starter feature grid</h2>
+  <div class="grid cols-2">
+    {% for feature in features %}
+    <article class="panel">
+      <h3>{{ feature.title }}</h3>
+      <p class="muted">{{ feature.description }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>Quick links</h2>
+  <div class="chip-row">
+    {% for link in quick_links %}
+      <a class="chip" href="{{ url_for(link.endpoint) }}">{{ link.label }}</a>
+    {% endfor %}
+  </div>
+  <p class="muted">Template release {{ release_year }} · ready for customization.</p>
 </section>
 {% endblock %}
